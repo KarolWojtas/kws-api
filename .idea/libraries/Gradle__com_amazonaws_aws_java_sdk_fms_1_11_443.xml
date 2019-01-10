@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.amazonaws:aws-java-sdk-fms:1.11.443">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.amazonaws/aws-java-sdk-fms/1.11.443/c405b64ce33812ab2fcd5a0ab9e7e541a3843178/aws-java-sdk-fms-1.11.443.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.amazonaws/aws-java-sdk-fms/1.11.443/99f22a182626b08e1901f9e94f74e06a1ede6e29/aws-java-sdk-fms-1.11.443-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
