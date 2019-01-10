@@ -3,7 +3,6 @@ package services
 import com.github.salomonbrys.kodein.*
 import com.serverless.domain.Reservation
 import com.serverless.domain.ReservationOrigin
-import com.serverless.domain.ReservationStage
 import com.serverless.mappers.ZonedDateTimeConverter
 import com.serverless.config.DynamoDBAdapter
 import com.serverless.config.kodein
@@ -21,7 +20,6 @@ class ReservationDaoServiceITTest{
     val resService = kodein.instance<ReservationService>()
     val dateConverter = ZonedDateTimeConverter()
     val reservation = Reservation(tables = hashSetOf(1,2,3), date = ZonedDateTime.now()).apply {
-        code = "1234"
         origin = ReservationOrigin.USER
         seats = 3
     }
@@ -92,7 +90,6 @@ class ReservationDaoServiceITTest{
     fun `should find reservation by specific date and time`(){
         val time = ZonedDateTime.of(2019, 1,1,20,30,0,0, kodein.instance("warsawZoneId"))
         val reservation = Reservation(hashSetOf(1,2,3), time).apply {
-            code = "0987"
             origin = ReservationOrigin.WORKER
             seats = 4
         }

@@ -13,7 +13,7 @@ import java.time.ZonedDateTime
 interface ReservationDaoService{
     fun save(reservation: Reservation)
     fun queryById(id: String): Reservation?
-    fun scanAll(linit: Int = 100): List<Reservation>
+    fun scanAll(limit: Int = 100): List<Reservation>
     fun scanAllForDateTime(startDate: ZonedDateTime, endDate: ZonedDateTime): List<Reservation>
     fun queryAllConfirmedForDateTimePeriod(confirmed: Boolean, startDate: ZonedDateTime, endDate: ZonedDateTime): List<Reservation>
     fun queryAllConfirmedForDateTimeMoment(confirmed: Boolean, moment: ZonedDateTime): List<Reservation>

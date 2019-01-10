@@ -19,7 +19,7 @@ class ReservationMapperTest{
             description = null
             seats = 6
         }
-        val dto = mapper.reservationToReservaationDto(reservation)
+        val dto = mapper.reservationToReservationDto(reservation)
         assertAll(
                 { assertEquals(reservation.date, dto.date)},
                 { assertEquals(reservation.seats, dto.seats)},

@@ -4,60 +4,50 @@ import com.github.salomonbrys.kodein.instance
 import com.serverless.config.kodein
 import com.serverless.domain.Reservation
 import com.serverless.domain.ReservationOrigin
-import com.serverless.domain.ReservationStage
 import com.serverless.services.ReservationDaoService
-import com.serverless.services.ReservationService
 import com.serverless.services.ReservationServiceImpl
 import org.junit.jupiter.api.Assertions.*
 import org.mockito.BDDMockito.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.*
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import java.time.ZonedDateTime
-import java.util.*
-import java.util.concurrent.TimeUnit
 
 class ReservationServiceUnitTest{
     @Mock
     lateinit var resDao: ReservationDaoService
-    lateinit var resService: ReservationServiceImpl
+    var resService: ReservationServiceImpl
     val offsetMin = 30L
     val time1 = ZonedDateTime.of(2019, 1,1,20,30,0,0, kodein.instance("warsawZoneId"))
     val time2 = time1.plusMinutes(offsetMin)
     val time3 = time1.plusMinutes(offsetMin*2)
     val reservation1 = Reservation(hashSetOf(1,2), time1).apply {
-        code = "0987"
         origin = ReservationOrigin.WORKER
         seats = 4
     }
     val reservation5 = Reservation(hashSetOf(1,2), time2).apply {
-        code = "0987"
         origin = ReservationOrigin.WORKER
         seats = 4
     }
     val reservation2 = Reservation(hashSetOf(3,4), time1).apply {
-        code = "0987"
         origin = ReservationOrigin.USER
         seats = 4
     }
 
     val reservation3 = Reservation(hashSetOf(3,4), time2).apply {
-        code = "0987"
         origin = ReservationOrigin.WORKER
         seats = 4
     }
     val reservation4 = Reservation(hashSetOf(3,4), time3).apply {
-        code = "0987"
         origin = ReservationOrigin.WORKER
         seats = 4
     }
 
     init {
         MockitoAnnotations.initMocks(this)
-        resService = ReservationServiceImpl(this.resDao)
+        resService = ReservationServiceImpl(this.resDao, kodein.instance())
     }
     @Test
     fun `mocks initialized`(){
@@ -90,7 +80,7 @@ class ReservationServiceUnitTest{
 
     }
     @Test
-    fun `should return if tables`(testReporter: TestReporter){
+    fun `should return tables reserved`(testReporter: TestReporter){
         val resList = listOf(reservation1, reservation2, reservation3, reservation4, reservation5)
 
         given(resDao.queryAllConfirmedForDateTimePeriod(confirmed = anyBoolean(), startDate = any(ZonedDateTime::class.java)?: ZonedDateTime.now(),

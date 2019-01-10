@@ -6,6 +6,7 @@
 .project
 .classpath
 variables.yml
+credentials.json
 
 # Package Files
 *.jar

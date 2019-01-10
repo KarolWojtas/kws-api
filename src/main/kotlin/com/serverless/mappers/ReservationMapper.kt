@@ -14,9 +14,11 @@ interface ReservationMapper{
             Mapping(target = "tables", source = "tables"),
             Mapping(target = "date", source = "date"),
             Mapping(target = "email", source="email"),
-            Mapping(target = "description", source="description")
+            Mapping(target = "description", source="description"),
+            Mapping(target = "id", source="id"),
+            Mapping(target = "created", source="created")
     )
-    fun reservationToReservaationDto(reservation: Reservation): ReservationDto
+    fun reservationToReservationDto(reservation: Reservation): ReservationDto
     @InheritInverseConfiguration
     fun reservationDtoToReservation(reservationDto: ReservationDto): Reservation
 
