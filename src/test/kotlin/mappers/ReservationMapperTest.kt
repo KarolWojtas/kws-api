@@ -1,4 +1,4 @@
-
+package mappers
 import com.serverless.domain.Reservation
 import com.serverless.domain.ReservationDto
 import com.serverless.mappers.ReservationMapper
@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
 import org.junit.jupiter.api.assertAll
-import java.lang.reflect.Executable
 import java.time.ZonedDateTime
 
 class ReservationMapperTest{

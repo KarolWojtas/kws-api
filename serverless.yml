@@ -21,6 +21,8 @@ provider:
   name: aws
   runtime: java8
   stage: dev
+  environment:
+    DYNAMO_DB_HOST: ${file(../variables.yml):dynamoDbHost}
 # you can overwrite defaults here
 #  stage: dev
 #  region: us-east-1

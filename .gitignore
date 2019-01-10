@@ -5,6 +5,7 @@
 /.settings/
 .project
 .classpath
+variables.yml
 
 # Package Files
 *.jar

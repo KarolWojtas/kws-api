@@ -4,18 +4,26 @@ import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig
 import com.amazonaws.services.dynamodbv2.document.DynamoDB
 import com.amazonaws.services.dynamodbv2.document.Table
 import com.amazonaws.services.dynamodbv2.model.*
 import com.github.salomonbrys.kodein.instance
+import com.serverless.domain.Reservation
 
 class DynamoDBAdapter{
     private val client = AmazonDynamoDBClientBuilder.standard()
             .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(kodein.instance("dynamoDbHost"), Regions.EU_CENTRAL_1.name))
             .build()
-    val dynamoDb = DynamoDB(client)
-    val dynamoDbMapper = DynamoDBMapper(client)
+    private val mapperConfig = DynamoDBMapperConfig.Builder().apply {
+        saveBehavior = DynamoDBMapperConfig.SaveBehavior.PUT
+    }.build()
 
+    val dynamoDb = DynamoDB(client)
+    val dynamoDbMapper = DynamoDBMapper(client, mapperConfig)
+    companion object {
+        const val CONFIRMED_INDEX = "ConfirmedIndex"
+    }
     fun createReservationTable(){
 
         val attributeDefs = listOf(
@@ -29,7 +37,7 @@ class DynamoDBAdapter{
         )
 
         val globalIndex = GlobalSecondaryIndex()
-                .withIndexName("ConfirmedIndex")
+                .withIndexName(CONFIRMED_INDEX)
                 .withProvisionedThroughput(ProvisionedThroughput()
                         .withReadCapacityUnits( 10)
                         .withWriteCapacityUnits(1))
@@ -47,7 +55,6 @@ class DynamoDBAdapter{
                 .withAttributeDefinitions(attributeDefs)
                 .withKeySchema(tableKeySchema)
                 .withGlobalSecondaryIndexes(globalIndex)
-
         try {
             println("Start create")
             val table: Table = dynamoDb.createTable(createTableRequest)
@@ -56,7 +63,6 @@ class DynamoDBAdapter{
         }catch (e: Exception){
             println("Create error: \n ${e.message}")
         }
-
 
     }
     fun dropReservationTable(){

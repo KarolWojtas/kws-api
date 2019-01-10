@@ -1,28 +1,29 @@
+package services
+
 import com.github.salomonbrys.kodein.*
 import com.serverless.domain.Reservation
 import com.serverless.domain.ReservationOrigin
 import com.serverless.domain.ReservationStage
 import com.serverless.mappers.ZonedDateTimeConverter
 import com.serverless.config.DynamoDBAdapter
-import com.serverless.services.ReservationService
 import com.serverless.config.kodein
+import com.serverless.services.ReservationDaoService
+import com.serverless.services.ReservationService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestReporter
 import java.time.*
-import java.time.temporal.TemporalAccessor
-import java.util.*
 
-class ReservationServiceTest{
+class ReservationDaoServiceITTest{
     val dynamoDbAdapter = kodein.instance<DynamoDBAdapter>()
+    val resDao = kodein.instance<ReservationDaoService>()
     val resService = kodein.instance<ReservationService>()
     val dateConverter = ZonedDateTimeConverter()
     val reservation = Reservation(tables = hashSetOf(1,2,3), date = ZonedDateTime.now()).apply {
         code = "1234"
         origin = ReservationOrigin.USER
         seats = 3
-        stage = ReservationStage.START
     }
 
     @Test
@@ -38,8 +39,8 @@ class ReservationServiceTest{
     @Test
     @Disabled
     fun shouldSaveReservation(){
-        resService.save(reservation)
-        resService.scanAll().forEach { println(it) }
+        resDao.save(reservation)
+        resDao.scanAll().forEach { println(it) }
 
 
     }
@@ -59,21 +60,21 @@ class ReservationServiceTest{
     fun `should query reservations for given date period`(){
         val startDate = ZonedDateTime.of(2019,1,9,16,0,0,0, ZoneId.ofOffset("UTC", ZoneOffset.ofHours(1)))
         val endDate = ZonedDateTime.of(2019,1,10,23,0,0,0, ZoneId.ofOffset("UTC", ZoneOffset.ofHours(1)))
-        resService.queryAllConfirmedForDateTime(true, startDate, endDate).forEach { println(it) }
+        resDao.queryAllConfirmedForDateTimePeriod(true, startDate, endDate).forEach { println(it) }
     }
     @Test
     fun `should find by id`(){
-        val reservation = resService.scanAll().getOrNull(0)
-        val reservationFoundByIndex = resService.queryById(reservation?.id?:"noid")
+        val reservation = resDao.scanAll().getOrNull(0)
+        val reservationFoundByIndex = resDao.queryById(reservation?.id?:"noid")
         assertEquals(reservation, reservationFoundByIndex)
     }
     @Test
     fun `should unconfirm a reservation`(){
         dynamoDbAdapter.dynamoDbMapper.save(reservation)
-        val savedReservation = resService.scanAllForDateTime(reservation.date?: ZonedDateTime.now(), reservation.date?: ZonedDateTime.now()).first()
+        val savedReservation = resDao.scanAllForDateTime(reservation.date?: ZonedDateTime.now(), reservation.date?: ZonedDateTime.now()).first()
         assertNotNull(savedReservation)
         resService.unconfirmReservation(savedReservation.id?:"")
-        val changedRes = resService.queryById(savedReservation.id?:"")
+        val changedRes = resDao.queryById(savedReservation.id?:"")
         assertFalse(changedRes?.confirmed?:false)
 
     }
@@ -81,10 +82,23 @@ class ReservationServiceTest{
     fun `should confirm a reservation`(){
         reservation.confirmed = false
         dynamoDbAdapter.dynamoDbMapper.save(reservation)
-        val savedReservation = resService.scanAllForDateTime(reservation.date?: ZonedDateTime.now(), reservation.date?: ZonedDateTime.now()).first()
+        val savedReservation = resDao.scanAllForDateTime(reservation.date?: ZonedDateTime.now(), reservation.date?: ZonedDateTime.now()).first()
         assertNotNull(savedReservation)
         resService.confirmReservation(savedReservation.id?:"")
-        val changedRes = resService.queryById(savedReservation.id?:"")
+        val changedRes = resDao.queryById(savedReservation.id?:"")
         assertTrue(changedRes?.confirmed?:false)
     }
+    @Test
+    fun `should find reservation by specific date and time`(){
+        val time = ZonedDateTime.of(2019, 1,1,20,30,0,0, kodein.instance("warsawZoneId"))
+        val reservation = Reservation(hashSetOf(1,2,3), time).apply {
+            code = "0987"
+            origin = ReservationOrigin.WORKER
+            seats = 4
+        }
+        resDao.save(reservation)
+        val resList = resDao.queryAllConfirmedForDateTimeMoment(true, time)
+        assertEquals(reservation, resList.first())
+    }
+
 }
