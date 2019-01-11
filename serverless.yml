@@ -66,6 +66,14 @@ functions:
           path: reservations
           method: get
           cors: true
+  getTableListHandler:
+    handler: com.serverless.handlers.GetTableListHandler
+    timeout: 100
+    events:
+      - http:
+          path: tables/{time}
+          method: get
+          cors: true
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events

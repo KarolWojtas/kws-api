@@ -6,6 +6,7 @@ import com.serverless.domain.ReservationOrigin
 import com.serverless.mappers.ZonedDateTimeConverter
 import com.serverless.config.DynamoDBAdapter
 import com.serverless.config.kodein
+import com.serverless.mappers.ParameterConverter
 import com.serverless.services.ReservationDaoService
 import com.serverless.services.ReservationService
 import org.junit.jupiter.api.Assertions.*
@@ -18,8 +19,10 @@ class ReservationDaoServiceITTest{
     val dynamoDbAdapter = kodein.instance<DynamoDBAdapter>()
     val resDao = kodein.instance<ReservationDaoService>()
     val resService = kodein.instance<ReservationService>()
+    val paramConverter = kodein.instance<ParameterConverter>()
     val dateConverter = ZonedDateTimeConverter()
-    val reservation = Reservation(tables = hashSetOf(1,2,3), date = ZonedDateTime.now()).apply {
+    val time = ZonedDateTime.now()
+    val reservation = Reservation(tables = hashSetOf(4,11), date = time).apply {
         origin = ReservationOrigin.USER
         seats = 3
     }
@@ -38,6 +41,7 @@ class ReservationDaoServiceITTest{
     @Disabled
     fun shouldSaveReservation(){
         resDao.save(reservation)
+        println(paramConverter.convertToMillis(time))
         resDao.scanAll().forEach { println(it) }
 
 

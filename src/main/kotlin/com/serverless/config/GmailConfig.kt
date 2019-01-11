@@ -24,7 +24,7 @@ class GmailAdapter{
         private val JSON_FACTORY = JacksonFactory.getDefaultInstance()
         private val APP_NAME = "kws-api"
         private fun getCredentials(httpTransport: NetHttpTransport): Credential{
-            val inputStream = GmailAdapter.javaClass.getResourceAsStream(CREDENTIALS_FILE_PATH)
+            val inputStream = GmailAdapter::class.java.getResourceAsStream(CREDENTIALS_FILE_PATH)
             val clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, InputStreamReader(inputStream))
             val flow = GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY, clientSecrets, SCOPES).apply {
                 setDataStoreFactory(FileDataStoreFactory(File(TOKENS_DIRECTORY_PATH)))

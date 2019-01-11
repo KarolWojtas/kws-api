@@ -88,6 +88,55 @@ Resources:
                       type: string
                     Access-Control-Allow-Origin:
                       type: string
+          '/tables/{time}':
+            options:
+              x-amazon-apigateway-integration:
+                type: mock
+                requestTemplates:
+                  application/json: '{ "statusCode" : 200 }'
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''get'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
+            get:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  'Fn::Sub': >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetTableListHandler.Arn}/invocations
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''get'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
   HelloLambdaPermission:
     Type: 'AWS::Lambda::Permission'
     DependsOn:
@@ -123,4 +172,31 @@ Resources:
       Action: 'lambda:InvokeFunction'
       FunctionName:
         Ref: GetReservationListHandler
+      Principal: apigateway.amazonaws.com
+  GetTableListHandler:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: com.serverless.handlers.GetTableListHandler
+      Runtime: java8
+      CodeUri: build/libs/kws-api-dev-all.jar
+      MemorySize: 128
+      Timeout: 100
+      Environment:
+        Variables: {}
+      Events:
+        Event1:
+          Type: Api
+          Properties:
+            Path: '/tables/{time}'
+            Method: get
+            RestApiId:
+              Ref: KwsApi
+  GetTableListHandlerLambdaPermission:
+    Type: 'AWS::Lambda::Permission'
+    DependsOn:
+      - GetTableListHandler
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName:
+        Ref: GetTableListHandler
       Principal: apigateway.amazonaws.com

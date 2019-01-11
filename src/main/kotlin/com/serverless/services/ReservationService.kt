@@ -20,7 +20,7 @@ class ReservationServiceImpl(val reservationDao: ReservationDaoService, val mapp
     override fun confirmReservation(id: String) {
         val resFound = reservationDao.queryById(id)
         if(resFound !== null){
-            resFound?.apply { confirmed = true }
+            resFound.apply { confirmed = true }
             reservationDao.save(resFound)
         }
     }
@@ -28,7 +28,7 @@ class ReservationServiceImpl(val reservationDao: ReservationDaoService, val mapp
     override fun unconfirmReservation(id: String) {
         val resFound = reservationDao.queryById(id)
         if(resFound !== null){
-            resFound?.apply { confirmed = false }
+            resFound.apply { confirmed = false }
             reservationDao.save(resFound)
         }
     }
