@@ -17,6 +17,7 @@ interface ReservationDaoService{
     fun scanAllForDateTime(startDate: ZonedDateTime, endDate: ZonedDateTime): List<Reservation>
     fun queryAllConfirmedForDateTimePeriod(confirmed: Boolean, startDate: ZonedDateTime, endDate: ZonedDateTime): List<Reservation>
     fun queryAllConfirmedForDateTimeMoment(confirmed: Boolean, moment: ZonedDateTime): List<Reservation>
+    fun batchDeleteReservations(moment: ZonedDateTime)
 }
 class ReservationDaoServiceImpl(val dynamoDBAdapter: DynamoDBAdapter) : ReservationDaoService{
     private val startDateParam = ":startDate"
@@ -79,4 +80,27 @@ class ReservationDaoServiceImpl(val dynamoDBAdapter: DynamoDBAdapter) : Reservat
         return dynamoDBAdapter.dynamoDbMapper.query(Reservation::class.java, qExp)
     }
     fun Boolean.toNumberString(): String =  if(this) "1" else "0"
+
+    override fun batchDeleteReservations(moment: ZonedDateTime) {
+        val momentStr = timeConverter.convert(moment)
+        val confirmedStr = true.toNumberString()
+        val unconfirmedStr = false.toNumberString()
+
+        val qExpConf = DynamoDBQueryExpression<Reservation>().apply {
+            indexName = DynamoDBAdapter.CONFIRMED_INDEX
+            isConsistentRead = false
+            keyConditionExpression = "Confirmed = $confirmedParam AND Date_Time <= $momentParam"
+            expressionAttributeValues = mapOf(confirmedParam to AttributeValue().withN(confirmedStr), momentParam to AttributeValue().withS(momentStr))
+        }
+        val qExpUnconf = DynamoDBQueryExpression<Reservation>().apply {
+            indexName = DynamoDBAdapter.CONFIRMED_INDEX
+            isConsistentRead = false
+            keyConditionExpression = "Confirmed = $confirmedParam AND Date_Time <= $momentParam"
+            expressionAttributeValues = mapOf(confirmedParam to AttributeValue().withN(unconfirmedStr), momentParam to AttributeValue().withS(momentStr))
+        }
+        val confResList = dynamoDBAdapter.dynamoDbMapper.query(Reservation::class.java, qExpConf)
+        val unconfResList = dynamoDBAdapter.dynamoDbMapper.query(Reservation::class.java, qExpUnconf)
+        val itemsToDelete = confResList.addAll(unconfResList)
+        dynamoDBAdapter.dynamoDbMapper.batchDelete(itemsToDelete)
+    }
 }

@@ -1,6 +1,6 @@
 package com.serverless.services
 
-import com.serverless.domain.Reservation
+
 import com.serverless.domain.ReservationDto
 import com.serverless.mappers.ReservationMapper
 import java.time.ZonedDateTime
@@ -13,6 +13,7 @@ interface ReservationService{
     fun findTablesReservedForPeriod(moment: ZonedDateTime, offsetMin: Long = 30, repeatOffset: Int = 2): List<Int>
     fun findReservationsForPeriod(confirmed: Boolean = true, startDate: ZonedDateTime, endDate: ZonedDateTime): List<ReservationDto>
     fun findReservationsForMoment(confirmed: Boolean = true, moment: ZonedDateTime): List<ReservationDto>
+    fun deleteItemsPastMoment(moment: ZonedDateTime)
 }
 class ReservationServiceImpl(val reservationDao: ReservationDaoService, val mapper: ReservationMapper): ReservationService{
 
@@ -53,4 +54,6 @@ class ReservationServiceImpl(val reservationDao: ReservationDaoService, val mapp
 
     override fun findReservationsForMoment(confirmed: Boolean, moment: ZonedDateTime): List<ReservationDto>
             = reservationDao.queryAllConfirmedForDateTimeMoment(confirmed = confirmed, moment = moment).map (mapper::reservationToReservationDto)
+
+    override fun deleteItemsPastMoment(moment: ZonedDateTime) = reservationDao.batchDeleteReservations(moment)
 }
