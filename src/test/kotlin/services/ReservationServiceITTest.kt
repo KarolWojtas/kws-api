@@ -57,7 +57,7 @@ class ReservationDaoServiceITTest{
     @Test
     fun `should query reservations for given date period`(){
         val startDate = ZonedDateTime.of(2019,1,9,16,0,0,0, ZoneId.ofOffset("UTC", ZoneOffset.ofHours(1)))
-        val endDate = ZonedDateTime.of(2019,1,10,23,0,0,0, ZoneId.ofOffset("UTC", ZoneOffset.ofHours(1)))
+        val endDate = ZonedDateTime.of(2019,1,11,23,0,0,0, ZoneId.ofOffset("UTC", ZoneOffset.ofHours(1)))
         resDao.queryAllConfirmedForDateTimePeriod(true, startDate, endDate).forEach { println(it) }
     }
     @Test
@@ -88,7 +88,7 @@ class ReservationDaoServiceITTest{
     }
     @Test
     fun `should find reservation by specific date and time`(){
-        val time = ZonedDateTime.of(2019, 1,1,20,30,0,0, kodein.instance("warsawZoneId"))
+        val time = ZonedDateTime.of(2019, 1,1,20,30,10,0, kodein.instance("warsawZoneId"))
         val reservation = Reservation(hashSetOf(1,2,3), time).apply {
             origin = ReservationOrigin.WORKER
             seats = 4
@@ -96,6 +96,13 @@ class ReservationDaoServiceITTest{
         resDao.save(reservation)
         val resList = resDao.queryAllConfirmedForDateTimeMoment(true, time)
         assertEquals(reservation, resList.first())
+    }
+    @Test
+    fun `should batch delete items`(){
+        val time = ZonedDateTime.now()
+        resService.deleteItemsPastMoment(time)
+        val resList = resService.findReservationsForPeriod(startDate = time.minusDays(3), endDate = time)
+        assertEquals(resList, emptyList<Reservation>())
     }
 
 }

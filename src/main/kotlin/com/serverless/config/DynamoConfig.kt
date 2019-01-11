@@ -13,7 +13,7 @@ import com.serverless.domain.Reservation
 
 class DynamoDBAdapter{
     private val client = AmazonDynamoDBClientBuilder.standard()
-            .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration(kodein.instance("dynamoDbHost"), Regions.EU_CENTRAL_1.name))
+            .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration("http://172.16.123.1:8000", Regions.EU_CENTRAL_1.name))
             .build()
     private val mapperConfig = DynamoDBMapperConfig.Builder().apply {
         saveBehavior = DynamoDBMapperConfig.SaveBehavior.PUT

@@ -98,9 +98,9 @@ class ReservationDaoServiceImpl(val dynamoDBAdapter: DynamoDBAdapter) : Reservat
             keyConditionExpression = "Confirmed = $confirmedParam AND Date_Time <= $momentParam"
             expressionAttributeValues = mapOf(confirmedParam to AttributeValue().withN(unconfirmedStr), momentParam to AttributeValue().withS(momentStr))
         }
-        val confResList = dynamoDBAdapter.dynamoDbMapper.query(Reservation::class.java, qExpConf)
-        val unconfResList = dynamoDBAdapter.dynamoDbMapper.query(Reservation::class.java, qExpUnconf)
-        val itemsToDelete = confResList.addAll(unconfResList)
-        dynamoDBAdapter.dynamoDbMapper.batchDelete(itemsToDelete)
+        val confResList = dynamoDBAdapter.dynamoDbMapper.query(Reservation::class.java, qExpConf).toArray()
+        val unconfResList = dynamoDBAdapter.dynamoDbMapper.query(Reservation::class.java, qExpUnconf).toArray()
+
+        dynamoDBAdapter.dynamoDbMapper.batchDelete(*confResList, *unconfResList)
     }
 }

@@ -5,6 +5,6 @@
     "serverless-sam": "^0.2.0"
   },
   "scripts": {
-    "api": "gradle build shadowJar -x test; sls sam export -o template.yml; sam local start-api --skip-pull-image --profile default;"
+    "api": "gradle build shadowJar -x test; sls sam export -o template.yml; sam local start-api  --skip-pull-image --profile default;"
   }
 }
