@@ -4,6 +4,8 @@ import com.amazonaws.services.lambda.AWSLambda
 import com.amazonaws.services.lambda.AWSLambdaAsync
 import com.amazonaws.services.lambda.AWSLambdaAsyncClientBuilder
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder
+import com.amazonaws.services.sns.AmazonSNS
+import com.amazonaws.services.sns.AmazonSNSClientBuilder
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.salomonbrys.kodein.*
 import com.serverless.mappers.*
@@ -24,4 +26,5 @@ val kodein = Kodein{
     bind<ObjectMapper>() with singleton { ObjectMapper().apply { registerModule(ReservationFullModule()) } }
     bind<AWSLambdaAsync>() with singleton { AWSLambdaAsyncClientBuilder.defaultClient()}
     bind<AWSLambda>() with singleton { AWSLambdaClientBuilder.defaultClient() }
+    bind<AmazonSNS>() with singleton { AmazonSNSClientBuilder.defaultClient() }
 }

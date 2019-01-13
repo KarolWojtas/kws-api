@@ -59,6 +59,7 @@ dependencies {
 
   compile 'com.amazonaws:aws-java-sdk-dynamodb:1.11.443'
   compile 'com.amazonaws:aws-java-sdk-lambda:1.11.443'
+  compile 'com.amazonaws:aws-java-sdk-sns:1.11.443'
   
   compile group: 'com.github.salomonbrys.kodein', name: 'kodein', version: '4.1.0'
   compile("org.mapstruct:mapstruct:1.2.0.Final")

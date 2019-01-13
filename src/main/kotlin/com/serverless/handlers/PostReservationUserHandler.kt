@@ -7,6 +7,8 @@ import com.amazonaws.services.lambda.model.InvokeRequest
 import com.amazonaws.services.lambda.model.InvokeResult
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
+import com.amazonaws.services.sns.AmazonSNS
+import com.amazonaws.services.sns.model.PublishRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.salomonbrys.kodein.instance
 import com.serverless.ApiGatewayResponse
@@ -27,10 +29,10 @@ class PostReservationUserHandler : RequestHandler<Map<String, Any>, ApiGatewayRe
     private val resService = kodein.instance<ReservationService>()
     private val objectMapper = kodein.instance<ObjectMapper>()
     private val mapper = kodein.instance<ReservationMapper>()
-    private val awsLambdaAsync = kodein.instance<AWSLambdaAsync>()
     private val awsLambdaBlock = kodein.instance<AWSLambda>()
     private val mailTopicArn = kodein.instance<String>("mailTopicArn")
     private val mailFunctionName: String = kodein.instance("mailFunctionName")
+    private val sns = kodein.instance<AmazonSNS>()
 
     override fun handleRequest(input: Map<String, Any>, context: Context): ApiGatewayResponse
             = HandlerUtils.withErrorHandler(input, this::handle)
@@ -60,6 +62,8 @@ class PostReservationUserHandler : RequestHandler<Map<String, Any>, ApiGatewayRe
                             setInvocationType(InvocationType.RequestResponse)
                         }
                 awsLambdaBlock.invoke(invokeRequest)
+                val pubReq = PublishRequest().withMessage(requestPayload).withTopicArn(mailTopicArn)
+                sns.publish(pubReq)
 
                 ApiGatewayResponse.build {
                     statusCode = 200
