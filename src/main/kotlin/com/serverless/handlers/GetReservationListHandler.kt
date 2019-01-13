@@ -4,34 +4,27 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.github.salomonbrys.kodein.instance
 import com.serverless.ApiGatewayResponse
-import com.serverless.Handler
-import com.serverless.config.DynamoDBAdapter
 import com.serverless.config.kodein
-import com.serverless.domain.Reservation
-import com.serverless.handlers.responses.InputResponse
 import com.serverless.handlers.responses.ReservationListResponse
-import com.serverless.mappers.ParamConverterImpl
 import com.serverless.mappers.ParameterConverter
-import com.serverless.services.ReservationDaoServiceImpl
 import com.serverless.services.ReservationService
-import com.serverless.services.ReservationServiceImpl
-import org.apache.logging.log4j.LogManager
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
-class GetReservationListHandler : RequestHandler<Map<String, Any>, ApiGatewayResponse>{
+class GetReservationListHandler : RequestHandler<Map<String, Any>, ApiGatewayResponse>, InnerHandler{
     private val resService = kodein.instance<ReservationService>()
     private val paramConverter = kodein.instance<ParameterConverter>()
     private val zoneId = kodein.instance<ZoneId>("warsawZoneId")
 
-    override fun handleRequest(input: Map<String, Any>, context: Context): ApiGatewayResponse {
+    override fun handleRequest(input: Map<String, Any>, context: Context): ApiGatewayResponse
+            = HandlerUtils.withErrorHandler(input, this::handle)
 
+    override fun handle(input: Map<String, Any>): ApiGatewayResponse{
         val dateParam = ((input[HandlerUtils.QUERY_PARAMS] as Map<String, Any>?)?.get("date")) as String?
-        val timeParam = ((input.get(HandlerUtils.QUERY_PARAMS) as Map<String, Any>?)?.get("time")) as String?
-        val confirmedParam = ((input.get("queryStringParameters") as Map<String, Any>?)?.get("confirmed")) as String?
+        val timeParam = ((input[HandlerUtils.QUERY_PARAMS] as Map<String, Any>?)?.get("time")) as String?
+        val confirmedParam = ((input[HandlerUtils.QUERY_PARAMS] as Map<String, Any>?)?.get("confirmed")) as String?
 
-        val confirmed = confirmedParam !== "false"
+        val confirmed = confirmedParam != "false"
 
         val resList =
                 if (!dateParam.isNullOrBlank()) {
@@ -54,9 +47,5 @@ class GetReservationListHandler : RequestHandler<Map<String, Any>, ApiGatewayRes
             headers = mapOf("Access-Control-Allow-Origin" to "*", "Access-Control-Allow-Credentials" to "true")
 
         }
-
-    }
-    companion object {
-        private val LOG = LogManager.getLogger(this::class.java)
     }
 }

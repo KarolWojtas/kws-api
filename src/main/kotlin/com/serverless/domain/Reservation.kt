@@ -52,6 +52,7 @@ data class ReservationDto(var tables: HashSet<Int>, var date: ZonedDateTime, var
     var description: String? = null
     var id: String? = null
     var created: Date? = null
+    var confirmed: Boolean? = true
     constructor(): this(tables = hashSetOf(), date = ZonedDateTime.now(), seats = 0)
 }
 

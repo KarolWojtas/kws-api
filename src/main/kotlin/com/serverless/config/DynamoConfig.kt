@@ -8,8 +8,6 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig
 import com.amazonaws.services.dynamodbv2.document.DynamoDB
 import com.amazonaws.services.dynamodbv2.document.Table
 import com.amazonaws.services.dynamodbv2.model.*
-import com.github.salomonbrys.kodein.instance
-import com.serverless.domain.Reservation
 
 class DynamoDBAdapter{
     private val client = AmazonDynamoDBClientBuilder.standard()

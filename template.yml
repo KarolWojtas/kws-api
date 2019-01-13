@@ -2,25 +2,23 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
 Description: 'SAM template for Serverless framework service: '
 Resources:
-  Hello:
+  GetReservationListHandler:
     Type: 'AWS::Serverless::Function'
     Properties:
-      Handler: com.serverless.Handler
+      Handler: com.serverless.handlers.GetReservationListHandler
       Runtime: java8
       CodeUri: build/libs/kws-api-dev-all.jar
       MemorySize: 128
-      Timeout: 3
-      Environment:
-        Variables: {}
+      Timeout: 100
       Events:
         Event1:
           Type: Api
           Properties:
-            Path: /hello
+            Path: /reservations
             Method: get
             RestApiId:
-              Ref: KwsApi
-  KwsApi:
+              Ref: KwsApiV2
+  KwsApiV2:
     Type: 'AWS::Serverless::Api'
     Properties:
       StageName: dev
@@ -30,15 +28,6 @@ Resources:
           title:
             Ref: 'AWS::StackName'
         paths:
-          /hello:
-            get:
-              x-amazon-apigateway-integration:
-                httpMethod: POST
-                type: aws_proxy
-                uri:
-                  'Fn::Sub': >-
-                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Hello.Arn}/invocations
-              responses: {}
           /reservations:
             options:
               x-amazon-apigateway-integration:
@@ -50,7 +39,7 @@ Resources:
                     statusCode: 200
                     responseParameters:
                       method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
-                      method.response.header.Access-Control-Allow-Methods: '''get'''
+                      method.response.header.Access-Control-Allow-Methods: '''options,get,post'''
                       method.response.header.Access-Control-Allow-Origin: '''*'''
                     responseTemplates:
                       application/json: '{}'
@@ -76,6 +65,31 @@ Resources:
                     responseParameters:
                       method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
                       method.response.header.Access-Control-Allow-Methods: '''get'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
+            post:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  'Fn::Sub': >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostReservationUserHandler.Arn}/invocations
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''options,get,post'''
                       method.response.header.Access-Control-Allow-Origin: '''*'''
                     responseTemplates:
                       application/json: '{}'
@@ -137,33 +151,104 @@ Resources:
                       type: string
                     Access-Control-Allow-Origin:
                       type: string
-  HelloLambdaPermission:
-    Type: 'AWS::Lambda::Permission'
-    DependsOn:
-      - Hello
-    Properties:
-      Action: 'lambda:InvokeFunction'
-      FunctionName:
-        Ref: Hello
-      Principal: apigateway.amazonaws.com
-  GetReservationListHandler:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      Handler: com.serverless.handlers.GetReservationListHandler
-      Runtime: java8
-      CodeUri: build/libs/kws-api-dev-all.jar
-      MemorySize: 128
-      Timeout: 100
-      Environment:
-        Variables: {}
-      Events:
-        Event1:
-          Type: Api
-          Properties:
-            Path: /reservations
-            Method: get
-            RestApiId:
-              Ref: KwsApi
+          /reservations/admin:
+            options:
+              x-amazon-apigateway-integration:
+                type: mock
+                requestTemplates:
+                  application/json: '{ "statusCode" : 200 }'
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''post'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
+            post:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  'Fn::Sub': >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostReservationAdminHandler.Arn}/invocations
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''post'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
+          '/reservations/{id}':
+            options:
+              x-amazon-apigateway-integration:
+                type: mock
+                requestTemplates:
+                  application/json: '{ "statusCode" : 200 }'
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''patch'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
+            patch:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  'Fn::Sub': >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PatchReservationAdminHandler.Arn}/invocations
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''patch'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
   GetReservationListHandlerLambdaPermission:
     Type: 'AWS::Lambda::Permission'
     DependsOn:
@@ -181,8 +266,6 @@ Resources:
       CodeUri: build/libs/kws-api-dev-all.jar
       MemorySize: 128
       Timeout: 100
-      Environment:
-        Variables: {}
       Events:
         Event1:
           Type: Api
@@ -190,7 +273,7 @@ Resources:
             Path: '/tables/{time}'
             Method: get
             RestApiId:
-              Ref: KwsApi
+              Ref: KwsApiV2
   GetTableListHandlerLambdaPermission:
     Type: 'AWS::Lambda::Permission'
     DependsOn:
@@ -199,4 +282,79 @@ Resources:
       Action: 'lambda:InvokeFunction'
       FunctionName:
         Ref: GetTableListHandler
+      Principal: apigateway.amazonaws.com
+  PostReservationUserHandler:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: com.serverless.handlers.PostReservationUserHandler
+      Runtime: java8
+      CodeUri: build/libs/kws-api-dev-all.jar
+      MemorySize: 128
+      Timeout: 100
+      Events:
+        Event1:
+          Type: Api
+          Properties:
+            Path: /reservations
+            Method: post
+            RestApiId:
+              Ref: KwsApiV2
+  PostReservationUserHandlerLambdaPermission:
+    Type: 'AWS::Lambda::Permission'
+    DependsOn:
+      - PostReservationUserHandler
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName:
+        Ref: PostReservationUserHandler
+      Principal: apigateway.amazonaws.com
+  PostReservationAdminHandler:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: com.serverless.handlers.PostReservationAdminHandler
+      Runtime: java8
+      CodeUri: build/libs/kws-api-dev-all.jar
+      MemorySize: 128
+      Timeout: 100
+      Events:
+        Event1:
+          Type: Api
+          Properties:
+            Path: /reservations/admin
+            Method: post
+            RestApiId:
+              Ref: KwsApiV2
+  PostReservationAdminHandlerLambdaPermission:
+    Type: 'AWS::Lambda::Permission'
+    DependsOn:
+      - PostReservationAdminHandler
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName:
+        Ref: PostReservationAdminHandler
+      Principal: apigateway.amazonaws.com
+  PatchReservationAdminHandler:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: com.serverless.handlers.PatchReservationAdminHandler
+      Runtime: java8
+      CodeUri: build/libs/kws-api-dev-all.jar
+      MemorySize: 128
+      Timeout: 100
+      Events:
+        Event1:
+          Type: Api
+          Properties:
+            Path: '/reservations/{id}'
+            Method: patch
+            RestApiId:
+              Ref: KwsApiV2
+  PatchReservationAdminHandlerLambdaPermission:
+    Type: 'AWS::Lambda::Permission'
+    DependsOn:
+      - PatchReservationAdminHandler
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName:
+        Ref: PatchReservationAdminHandler
       Principal: apigateway.amazonaws.com

@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: kws-api # NOTE: update this with your service name
+service: kws-api-v2 # NOTE: update this with your service name
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
@@ -21,8 +21,7 @@ provider:
   name: aws
   runtime: java8
   stage: dev
-  environment:
-    DYNAMO_DB_HOST: ${file(../variables.yml):dynamoDbHost}
+  region: eu-central-1
 # you can overwrite defaults here
 #  stage: dev
 #  region: us-east-1
@@ -52,12 +51,6 @@ package:
   artifact: build/libs/kws-api-dev-all.jar
 
 functions:
-  hello:
-    handler: com.serverless.Handler
-    events:
-      - http:
-          path: hello
-          method: get
   getReservationListHandler:
     handler: com.serverless.handlers.GetReservationListHandler
     timeout: 100
@@ -74,6 +67,31 @@ functions:
           path: tables/{time}
           method: get
           cors: true
+  postReservationUserHandler:
+    handler: com.serverless.handlers.PostReservationUserHandler
+    timeout: 100
+    events:
+      - http:
+          path: reservations
+          method: post
+          cors: true
+  postReservationAdminHandler:
+    handler: com.serverless.handlers.PostReservationAdminHandler
+    timeout: 100
+    events:
+      - http:
+          path: reservations/admin
+          method: post
+          cors: true
+  patchReservationAdminHandler:
+    handler: com.serverless.handlers.PatchReservationAdminHandler
+    timeout: 100
+    events:
+      - http:
+          path: reservations/{id}
+          method: patch
+          cors: true
+
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
