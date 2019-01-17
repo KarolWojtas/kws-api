@@ -10,9 +10,9 @@ import com.amazonaws.services.dynamodbv2.document.Table
 import com.amazonaws.services.dynamodbv2.model.*
 
 class DynamoDBAdapter{
-    private val client = AmazonDynamoDBClientBuilder.standard()
-            .withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration("http://172.16.123.1:8000", Regions.EU_CENTRAL_1.name))
-            .build()
+    private val client = AmazonDynamoDBClientBuilder.defaultClient()
+            //.withEndpointConfiguration(AwsClientBuilder.EndpointConfiguration("http://172.16.123.1:8000", Regions.EU_CENTRAL_1.name))
+
     private val mapperConfig = DynamoDBMapperConfig.Builder().apply {
         saveBehavior = DynamoDBMapperConfig.SaveBehavior.PUT
     }.build()
